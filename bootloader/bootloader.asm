@@ -65,14 +65,54 @@ boot:
     mov si, msg
     call Print
 
-    ;--------------------------------------------------------------------------
-    ; Halt system
-    ;--------------------------------------------------------------------------
-    ; The bootloader's job is done. In a real OS, this would load the kernel.
-    ; For now, we simply halt with an infinite loop.
-    ;--------------------------------------------------------------------------
-    jmp $                              ; Infinite loop ($ = current address)
+      
+    ;------------------------------------------------------------------------------
+    ; Bootloader: Load the Kernel (Sector 2) from Disk
+    ;------------------------------------------------------------------------------
 
+    ;------------------------------------------------------------------------------
+    ; Setup buffer location (ES:BX) for disk read
+    ; ES:BX = 0x0050:0x0000 → Physical address = 0x0050 * 16 + 0x0000 = 0x0500
+    ;------------------------------------------------------------------------------
+        mov     ax, 0x0050          ; Segment where data will be loaded
+        mov     es, ax
+        xor     bx, bx              ; Offset = 0x0000 → ES:BX points to 0x0500
+
+    ;------------------------------------------------------------------------------
+    ; BIOS Disk Read via Interrupt 13h
+    ; Function: AH = 0x02 → Read Sectors
+    ;   AL = Number of sectors to read
+    ;   CH = Cylinder number (track)
+    ;   CL = Sector number (starts from 1)
+    ;   DH = Head number
+    ;   DL = Drive number (0x00 = floppy A:, 0x80 = first hard drive)
+    ;   ES:BX = Buffer address
+    ; On return:
+    ;   CF = 0 on success, 1 on error
+    ;------------------------------------------------------------------------------
+
+        mov     ah, 0x02            ; Function: Read sector(s)
+        mov     al, 0x01            ; Number of sectors to read = 1 (just sector 2)
+        mov     ch, 0x00            ; Cylinder 0
+        mov     cl, 0x02            ; Sector 2
+        mov     dh, 0x00            ; Head 0
+        mov     dl, 0x00            ; Drive 0 (floppy drive A:)
+        int     0x13                ; Call BIOS Disk Service
+
+        jc      error               ; Jump if CF = 1 (error occurred)
+        jmp     success             ; Otherwise, continue
+
+error:
+    mov     si, loading_error
+    call    Print
+    jmp     halt
+
+success:
+    mov     si, loading_success 
+    call    Print
+
+halt:
+    jmp     $
 
 ;==============================================================================
 ; Data Section
@@ -87,12 +127,12 @@ boot:
 ;   0x0D = Carriage Return (CR, \r)
 ;   0x00 = Null terminator
 ;------------------------------------------------------------------------------
-msg:
-    db "Welcome to Zeen OS!", 0x00
+msg db "Welcome to Zeen OS!", 0x00
+boot_message db "Loading `Zeen kernal`...", 0x0
+loading_error db "Disk read error! Halting system...", 0x0
+loading_success db "Kernel loaded successfully!...", 0x0
+ 
 
-
-;==============================================================================
-; Include VGA I/O Library
 ;==============================================================================
 ; Provides: ClearScreen, MoveCursor, Print, PutChar, and cursor management
 ;==============================================================================

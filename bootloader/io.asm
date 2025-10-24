@@ -4,12 +4,6 @@
 ; A lightweight VGA text mode (80x25) driver for x86 real mode operating systems.
 ; Provides low-level cursor management, character rendering, and screen operations.
 ;
-; Features:
-;   - Direct VGA memory manipulation for high performance
-;   - Hardware cursor synchronization
-;   - Configurable text attributes (color/styling)
-;   - Optimized screen clearing with REP STOSW
-;
 ; Target: 16-bit real mode (8086+)
 ; VGA Memory: 0xB800:0000 (CGA/EGA/VGA compatible)
 ; Screen Size: 80 columns × 25 rows
@@ -213,9 +207,17 @@ Print:
     test al, al                        ; Check for null terminator
     jz .done
 
+    ; checking for \n 
+    cmp al, 0x0A                       ; checking for \n character
+    je .newline  
+    
     mov bl, 0x0F                       ; White on black
     mov cx, 1
     call PutChar
+    jmp .loop
+
+.newline:
+    call NewLine
     jmp .loop
 
 .done:
@@ -263,6 +265,14 @@ ClearScreen:
 
     call UpdateHardwareCursor
     ret
+
+
+;==============================================================================
+; NewLine: This will print \n or new line to the vga memory 
+;==============================================================================
+NewLine:
+    
+    
 
 
 ;==============================================================================
