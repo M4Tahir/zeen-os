@@ -55,7 +55,8 @@ boot:
     mov ds, ax                         ; DS = 0x0000
     mov es, ax                         ; ES = 0x0000 (for string operations)
     mov ss, ax                         ; SS = 0x0000 (stack segment)
-    mov sp, 0x7C00                     ; SP = 0x7C00 (stack grows downward)
+    ;mov sp, 0x7C00                     ; SP = 0x7C00 (stack grows downward)
+    mov sp, 0x7BFF                     ; As the code is loaded into 0x7c00 region so we set up stack pointer so that we don't override the code.
 
     ;--------------------------------------------------------------------------
     ; Display welcome message
@@ -63,6 +64,9 @@ boot:
     call ClearScreen                   ; Erase screen and reset cursor
 
     mov si, msg
+    call Print
+
+    mov si, boot_message
     call Print
 
       
@@ -127,10 +131,10 @@ halt:
 ;   0x0D = Carriage Return (CR, \r)
 ;   0x00 = Null terminator
 ;------------------------------------------------------------------------------
-msg db "Welcome to Zeen OS!", 0x00
-boot_message db "Loading `Zeen kernal`...", 0x0
-loading_error db "Disk read error! Halting system...", 0x0
-loading_success db "Kernel loaded successfully!...", 0x0
+msg db "Welcome to Zeen OS!",0x0D, 0x0A, 0x00
+boot_message db "Loading `Zeen kernal`...", 0x0D, 0x0A, 0x0
+loading_error db "Disk read error! Halting system...",0x0D, 0x0A, 0x0
+loading_success db "Kernel loaded successfully!...",0x0D, 0x0A, 0x0
  
 
 ;==============================================================================

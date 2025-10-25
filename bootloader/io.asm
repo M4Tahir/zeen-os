@@ -210,6 +210,9 @@ Print:
     ; checking for \n 
     cmp al, 0x0A                       ; checking for \n character
     je .newline  
+
+    cmp al, 0x0D                       ; check for \r 
+    je .cr
     
     mov bl, 0x0F                       ; White on black
     mov cx, 1
@@ -218,6 +221,10 @@ Print:
 
 .newline:
     call NewLine
+    jmp .loop
+
+.cr:
+    call CarriageReturn
     jmp .loop
 
 .done:
@@ -269,11 +276,66 @@ ClearScreen:
 
 ;==============================================================================
 ; NewLine: This will print \n or new line to the vga memory 
+; Note: this will only do the new line not return the cursor to the begennin of the screen
 ;==============================================================================
 NewLine:
-    
-    
+    push ax
+    push bx
+    push cx
+    push dx
 
+    mov ax, [cursor_pos]     ; AX = byte offset
+    shr ax, 1                ; divide by 2 → character index
+    xor dx, dx               ; clear DX for division
+    mov cx, 80
+    div cx                   ; div: dx:ax, ax=quotient, dx=remainder: AX = row, DX = col
+
+    inc ax                   ; next row
+
+    mov bx, 80
+    mul bx                   ; AX = row * 80
+    add ax, dx               ; AX = row*80 + col (col=0 here)
+    shl ax, 1                ; AX *= 2 (byte offset)
+    mov [cursor_pos], ax     ; save new position
+
+    call UpdateHardwareCursor ; sync hardware cursor
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret
+
+;==============================================================================
+; CarriageReturn: \r This will move the cursor to the begenning of the currnt line 
+;==============================================================================
+CarriageReturn:
+    push ax
+    push bx
+    push cx
+    push dx
+
+    mov ax, [cursor_pos]     ; AX = byte offset
+    shr ax, 1                ; divide by 2 → character index
+    xor dx, dx               ; clear DX for division
+    mov cx, 80
+    div cx                   ; div: dx:ax, ax=quotient, dx=remainder: AX = row, DX = col
+
+    xor dx, dx               ; start column = 0
+
+    mov bx, 80
+    mul bx                   ; AX = row * 80
+    add ax, dx               ; AX = row*80 + col (col=0 here)
+    shl ax, 1                ; AX *= 2 (byte offset)
+    mov [cursor_pos], ax     ; save new position
+
+    call UpdateHardwareCursor ; sync hardware cursor
+
+    pop dx
+    pop cx
+    pop bx
+    pop ax
+    ret 
 
 ;==============================================================================
 ; End of io.asm

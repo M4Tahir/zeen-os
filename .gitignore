@@ -1,2 +1,8 @@
-/.idea
-/bin
+# IDE and editor files
+.idea/
+.vscode/
+
+# Build and binary output
+bin/
+build/
+
