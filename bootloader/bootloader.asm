@@ -78,7 +78,7 @@ boot:
     ; Setup buffer location (ES:BX) for disk read
     ; ES:BX = 0x0050:0x0000 → Physical address = 0x0050 * 16 + 0x0000 = 0x0500
     ;------------------------------------------------------------------------------
-        mov     ax, 0x0050          ; Segment where data will be loaded
+        mov     ax, 0x050          ; Segment where data will be loaded
         mov     es, ax
         xor     bx, bx              ; Offset = 0x0000 → ES:BX points to 0x0500
 
@@ -105,6 +105,8 @@ boot:
 
         jc      error               ; Jump if CF = 1 (error occurred)
         jmp     success             ; Otherwise, continue
+
+        jmp 0x50:0x0                ; Jump to start of the code and execute it (2nd sector loaded address)
 
 error:
     mov     si, loading_error
