@@ -1,5 +1,5 @@
 ;==============================================================================
-; bootloader.asm - Zeen OS Master Boot Record
+; bootloader.asm;
 ;==============================================================================
 ; A minimal x86 bootloader that initializes the system and displays a welcome
 ; message using VGA text mode. Loaded by BIOS at 0x7C00.
@@ -21,12 +21,15 @@
 ;   - VGA-compatible display adapter
 ;==============================================================================
 
-org 0x7C00                             ; BIOS loads boot sector here
+;org 0x7C00                             ; BIOS loads boot sector here
 bits 16                                ; Real mode (16-bit)
 
 ;------------------------------------------------------------------------------
 ; Entry Point
 ;------------------------------------------------------------------------------
+; This is for the linker ld so i can find id
+global start
+
 start:
     jmp boot
 
@@ -137,7 +140,6 @@ msg db "Welcome to Zeen OS!",0x0D, 0x0A, 0x00
 boot_message db "Loading `Zeen kernal`...", 0x0D, 0x0A, 0x0
 loading_error db "Disk read error! Halting system...",0x0D, 0x0A, 0x0
 loading_success db "Kernel loaded successfully!...",0x0D, 0x0A, 0x0
- 
 
 ;==============================================================================
 ; Provides: ClearScreen, MoveCursor, Print, PutChar, and cursor management
