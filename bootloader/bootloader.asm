@@ -109,8 +109,6 @@ boot:
         jc      error               ; Jump if CF = 1 (error occurred)
         jmp     success             ; Otherwise, continue
 
-        jmp 0x50:0x0                ; Jump to start of the code and execute it (2nd sector loaded address)
-
 error:
     mov     si, loading_error
     call    Print
@@ -119,8 +117,18 @@ error:
 success:
     mov     si, loading_success 
     call    Print
+;--------------------------------------------------------------------------
+    ; Jump to Kernel Entry Point
+    ;--------------------------------------------------------------------------
+    ; Option 1: Direct jump (simple, works with your linker script)
+    ; jmp     0x00:0x600          ; Physical: 0x500 + 0x100 = 0x600
+    
+    ; Option 2: Read entry point from ELF header (more flexible)
+     mov     eax, [0x500 + 0x18]  ; Read 32-bit entry point at offset 0x18
+     jmp     eax                   ; Jump to entry point address
 
 halt:
+
     jmp     $
 
 ;==============================================================================

@@ -23,6 +23,9 @@ set architecture i8086
 # to the waiting QEMU instance.
 target remote localhost:26000
 
+# Load symbols from ELF
+symbol-file build/kernal/kernal
+add-symbol-file build/kernal/kernal 0x500
 
 # BIOS loads the bootloader to physical address 0x7C00.
 # This ensures GDB stops execution right when the bootloader
