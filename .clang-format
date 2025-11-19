@@ -1,11 +1,14 @@
 Language: C
 BasedOnStyle: LLVM
-IndentWidth: 8
-UseTab: ForIndentation
-TabWidth: 8
-ColumnLimit: 80
 
-# Brace style
+# --- Indentation ---
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+ColumnLimit: 100
+
+# --- Brace Wrapping ---
 BreakBeforeBraces: Linux
 AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
@@ -13,27 +16,27 @@ AllowShortLoopsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 IndentCaseLabels: false
 
-# Spaces
-SpaceBeforeParens: ControlStatementsExceptControlMacros
+# --- Spaces ---
+SpaceBeforeParens: ControlStatements
 SpaceAfterCStyleCast: false
 SpaceAroundPointerQualifiers: Default
 PointerAlignment: Right
 
-# Alignment
+# --- Alignment ---
 AlignConsecutiveAssignments: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignConsecutiveMacros: Consecutive
 AlignTrailingComments: true
 SpacesBeforeTrailingComments: 1
 
-# Line breaks
+# --- Line breaks ---
 AlignEscapedNewlines: Left
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
 BreakStringLiterals: true
 
-# Misc
+# --- Misc ---
 InsertTrailingCommas: None
-ReflowComments: false
+ReflowComments: true
 MaxEmptyLinesToKeep: 1
 SortIncludes: false
