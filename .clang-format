@@ -6,30 +6,34 @@ TabWidth: 8
 ColumnLimit: 80
 
 # Brace style
-BreakBeforeBraces: Attach
+BreakBeforeBraces: Linux
 AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
+IndentCaseLabels: false
 
 # Spaces
-SpaceBeforeParens: ControlStatements
+SpaceBeforeParens: ControlStatementsExceptControlMacros
 SpaceAfterCStyleCast: false
 SpaceAroundPointerQualifiers: Default
-PointerAlignment: Left
+PointerAlignment: Right
 
 # Alignment
-AlignConsecutiveAssignments: false
-AlignConsecutiveDeclarations: false
-AlignTrailingComments: false
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
+AlignTrailingComments: true
+SpacesBeforeTrailingComments: 1
 
 # Line breaks
+AlignEscapedNewlines: Left
 BreakBeforeBinaryOperators: None
 BreakBeforeTernaryOperators: true
 BreakStringLiterals: true
 
 # Misc
 InsertTrailingCommas: None
-ReflowComments: true
-
-AlignEscapedNewlines: Left
+ReflowComments: false
+MaxEmptyLinesToKeep: 1
+SortIncludes: false
