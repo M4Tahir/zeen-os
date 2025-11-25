@@ -1,13 +1,13 @@
 BUILD_DIR = ./build
 
-BOOTLOADER = $(BUILD_DIR)/bootloader/bootloader.o
+BOOTLOADER = $(BUILD_DIR)/boot/bootloader.o
 KERNEL = $(BUILD_DIR)/kernal/kernal
 DISK_IMG = $(BUILD_DIR)/disk.img
 
 all: bootdisk
 
 bootloader:
-	$(MAKE) -C bootloader
+	$(MAKE) -C boot
 
 kernal:
 	$(MAKE) -C kernal

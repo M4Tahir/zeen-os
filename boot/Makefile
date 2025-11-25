@@ -1,4 +1,4 @@
-BUILD_DIR := ../build/bootloader
+BUILD_DIR := ../build/boot
 
 BOOTLOADER_SRCS := $(wildcard *.asm)
 BOOTLOADER_OBJS := $(patsubst %.asm, $(BUILD_DIR)/%.o, $(BOOTLOADER_SRCS))

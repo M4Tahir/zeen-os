@@ -42,20 +42,20 @@ boot:
     jne halt
 
     ; Load kernel from sector 2
-    mov ax, 0x0050
-    mov es, ax
-    xor bx, bx
+    ; mov ax, 0x0050
+    ; mov es, ax
+    ; xor bx, bx
 
-    mov ah, 0x02
-    mov al, 0x01
-    mov ch, 0x00
-    mov cl, 0x02
-    mov dh, 0x00
-    mov dl, 0x00
-    int 0x13
+    ; mov ah, 0x02
+    ; mov al, 0x01
+    ; mov ch, 0x00
+    ; mov cl, 0x02
+    ; mov dh, 0x00
+    ; mov dl, 0x00
+    ; int 0x13
 
-    jc error
-    jmp success
+    ; jc error
+    ; jmp success
 
 error:
     mov si, loading_error
