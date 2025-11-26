@@ -5,9 +5,9 @@
 ; Attempts enabling A20 repeatedly (A20_ENABLE_LOOPS times).
 ; ==============================================================================
 
-BITS 16
+bits 16
 
-A20_ENABLE_LOOPS     equ 255         ; Maximum retry attempts
+a20_enable_loops     equ 255         ; Maximum retry attempts
 
 ; ==============================================================================
 ; A20_ENABLE
@@ -20,7 +20,9 @@ A20_ENABLE_LOOPS     equ 255         ; Maximum retry attempts
 ;       AX = 0    Failed after all retries
 ; ==============================================================================
 
-A20_ENABLE:
+global a20_enable
+
+a20_enable:
         pushf
         push ds
         push es
@@ -29,31 +31,31 @@ A20_ENABLE:
 
         cli
 
-        mov     cx, A20_ENABLE_LOOPS
+        mov     cx, a20_enable_loops
 
-.Lloop:
-        call    .Ltest_a20
+.lloop:
+        call    .ltest_a20
         cmp     ax, 1
-        je      .Ldone
+        je      .ldone
 
         ; Try keyboard-controller method
-        call    .La20_kbc_enable
+        call    .la20_kbc_enable
 
         ; Try Fast A20 Gate
-        call    .Lfast_a20
+        call    .lfast_a20
 
-        loop    .Lloop
+        loop    .lloop
 
         ; Retries exhausted, failure
         mov     ax, 0
-        jmp     .Lexit
+        jmp     .lexit
 
 
 ; ==============================================================================
 ; .Lfast_a20  - Enable A20 using port 0x92 Fast A20 Gate.
 ; ==============================================================================
 
-.Lfast_a20:
+.lfast_a20:
         pusha
 
         in      al, 0x92
@@ -68,7 +70,7 @@ A20_ENABLE:
 ; .La20_kbc_enable – Legacy keyboard controller A20 enabling (stub)
 ; ==============================================================================
 
-.La20_kbc_enable:
+.la20_kbc_enable:
         pusha
         ; TODO: KBC command sequence (0x64/0x60)
         popa
@@ -82,7 +84,7 @@ A20_ENABLE:
 ;       AX = 0    A20 disabled
 ; ==============================================================================
 
-.Ltest_a20:
+.ltest_a20:
         push    bx
 
         ; ES:DI = 0000:0500
@@ -120,11 +122,11 @@ A20_ENABLE:
         ; Compare
         cmp     al, 0xFF
         mov     ax, 0
-        je      .Ltest_done
+        je      .ltest_done
 
         mov     ax, 1
 
-.Ltest_done:
+.ltest_done:
         pop     bx
         ret
 
@@ -133,10 +135,10 @@ A20_ENABLE:
 ; Restore registers and return
 ; ==============================================================================
 
-.Ldone:
+.ldone:
         mov     ax, 1
 
-.Lexit:
+.lexit:
         pop     di
         pop     si
         pop     es

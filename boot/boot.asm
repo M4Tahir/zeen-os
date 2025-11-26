@@ -1,17 +1,12 @@
 ;==============================================================================
-; bootloader.asm - Main bootloader file
+; boot.asm - Main bootloader file
 ;==============================================================================
 [bits 16]
 global start
 
-
-KERNEL_SEG equ 0x1000
-KERNEL_OFF equ 0x0000                ; Load kernal at addrss 64kb (0x1000*16+0x00 = 0x10000)
-KERNEL_SECT equ 32                   ; read 32 secotors
-KERNEL_LBA equ 2                     ; starting sector
-
-STACK_TOP equ 0x90000                ; Top of stack 0x90000 (576kb)
-STACK_BOTTOM equ 0x80000             ; Bottom of stack 64kb of stack.(not used just for rem)
+extern print
+extern clear_screen
+extern STACK_TOP
 
 start:
     jmp boot
@@ -21,8 +16,8 @@ start:
 ;------------------------------------------------------------------------------
 msg             db "Zeen OS", 0x0D, 0x0A, 0
 boot_message    db "Load...", 0x0D, 0x0A, 0
-loading_error   db "Disk err", 0x0D, 0x0A, 0
 loading_success db "OK!", 0x0D, 0x0A, 0
+loading_error db "Disk read error!", 0x0D,0x0A,0
 
 ;------------------------------------------------------------------------------
 ; Boot Initialization
@@ -57,57 +52,45 @@ boot:
 
     sti                         ; enable interrupts
 
-    call ClearScreen
+    call clear_screen
 
     mov si, msg
-    call Print
+    call print
 
     mov si, boot_message
-    call Print
+    call print
 
-    call load_kernal
+    ; Load stage 2 from second sector and jump to start of it;
+    ; we will load the sector right after 0x7c00 + 512byte and jump to it start
+    ; ES:BX = 0x7e0:0x000 -> 0x7c00
+  
+    ; Load Stage 2 (1 sector) immediately after Stage 1
+    mov ax, 0x07E0      ; ES = 0x07E0
+    mov es, ax
+    xor bx, bx          ; BX = 0 → ES:BX = 0x07E0:0x0000 → 0x7E00
 
-    jmp KERNEL_SEG:KERNEL_OFF   ; long jum segment:offset or we can use cs:ip (if we don't specify offset here)
-
-; load_kernel - uses INT 13h extension AH=0x42 (LBA)
-; Disk Address Packet (DAP) layout (16 bytes):
-; offset 0: size (1 byte, 0x10)
-; offset 1: reserved (1 byte, 0x00)
-; offset 2: word: number of sectors to transfer
-; offset 4: word: buffer offset
-; offset 6: word: buffer segment
-; offset 8: qword: starting LBA (little endian)
-load_kernal:
-    ; fill dap in memory
-    lea si, [dap]                 ; ds:si -> dap ds = 0x00
-
-    xor bx, bx
-    mov dl, 0x80                ; first hard disk
-    mov ah, 0x42                ; extend read support 
+    mov ah, 0x02        ; BIOS: read sectors
+    mov al, 0x01        ; number of sectors to read
+    mov ch, 0x00        ; cylinder
+    mov cl, 0x02        ; sector (second sector)
+    mov dh, 0x00        ; head
+    mov dl, 0x80        ; drive number (first hard disk)
     int 0x13
+    jc disk_error       ; jump if error
 
-    jc disk_error
-    ret
+    jmp 0x07E0:0x0000   ; jump to Stage 2 start
 
-; DAP(disk address packet) must be 16-byte structure
-dap:
-    db 0x10                       ; size = 16 bytes
-    db 0x00                       ; reserved
-    dw KERNEL_SECT                ; number of sectors to read (word)
-    dw KERNEL_OFF                 ; offset of buffer (word)
-    dw KERNEL_SEG                 ; segment of buffer (word)
-    dq KERNEL_LBA                 ; starting LBA (qword, little-endian)
 
 disk_error:
     mov si, loading_error
-    call Print
-    jmp $
-
+    call print
+    jum $
 
 ;------------------------------------------------------------------------------
-; Include external files
+; Include external files: not needed to be included, as they will be resolved by the linker
 ;------------------------------------------------------------------------------
-%include "io.asm"
+; %include "constants.asm"
+; %include "io.asm"
 
 ;------------------------------------------------------------------------------
 ; Boot Signature
