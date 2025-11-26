@@ -1,3 +1,5 @@
 
-void kmain() {}
+void kmain() {
+    while (0);
+}
 

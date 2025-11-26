@@ -1,6 +1,6 @@
 BUILD_DIR = ./build
 
-BOOTLOADER = $(BUILD_DIR)/boot/bootloader.o
+BOOTLOADER = $(BUILD_DIR)/boot/boot.bin
 KERNEL = $(BUILD_DIR)/kernal/kernal
 DISK_IMG = $(BUILD_DIR)/disk.img
 

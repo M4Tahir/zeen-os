@@ -6,7 +6,6 @@
 ;   - Temporary stack at 0x90000 (576 KB)
 ;   - Minimal GDT defined here; full GDT loaded in kmain
 ; ==============================================================================
-[org 0x10000]
 [bits 16]
 
 ; --------------------------------------------------------------------------
@@ -21,8 +20,7 @@ msg_pm      db "Entering protected mode...", 0x0D, 0x0A, 0
 ; --------------------------------------------------------------------------
 global _start
 extern kmain
-;extern A20_ENABLE
-;extern Print
+
 
 ; --------------------------------------------------------------------------
 ; Entry point
@@ -48,10 +46,20 @@ _start:
     cmp ax, 1
     je .La20_failure
 
-    ; -----------------------------
-    ; Minimal GDT (temporary) - for PM entry
-    ; We will setup the gdt in main function in c later.
-    ; -----------------------------
+
+; --------------------------------------------------------------------------
+; A20 Failure handler
+; --------------------------------------------------------------------------
+.La20_failure:
+    mov si, A20_FAIL
+    call Print
+    jmp $
+
+
+; -----------------------------
+; Minimal GDT (temporary) - for PM entry
+; We will setup the gdt in main function in c later.
+; -----------------------------
 align 8
 gdt_start:
 
@@ -125,14 +133,6 @@ protected_mode_start:
     ; --------------------------------
     ; Should never return here
     ; --------------------------------
-    jmp $
-
-; --------------------------------------------------------------------------
-; A20 Failure handler
-; --------------------------------------------------------------------------
-.La20_failure:
-    mov si, A20_FAIL
-    call Print
     jmp $
 
 %include "a20.asm"
