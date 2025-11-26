@@ -6,7 +6,6 @@ global start
 
 extern print
 extern clear_screen
-extern STACK_TOP
 
 start:
     jmp boot
@@ -18,6 +17,9 @@ msg             db "Zeen OS", 0x0D, 0x0A, 0
 boot_message    db "Load...", 0x0D, 0x0A, 0
 loading_success db "OK!", 0x0D, 0x0A, 0
 loading_error db "Disk read error!", 0x0D,0x0A,0
+
+STACK_TOP equ 0x90000                ; Top of stack 0x90000 (576kb)
+STACK_BOTTOM equ 0x80000             ; Bottom of stack 64kb of stack.(not used just for rem)
 
 ;------------------------------------------------------------------------------
 ; Boot Initialization
@@ -46,7 +48,11 @@ boot:
     ; Stack top start below the EBDA regsion from 576kb region toward the kernal load address
     ; SS:SP = 0x9000:0x0000
     ; physical = 0x9000 * 16 + 0x0000 = 0x90000 (576kb)
-    mov ax, STACK_TOP >> 4     ; 0x90000/16 = 0x9000     
+
+    mov ax, STACK_TOP     ; 0x90000/16 = 0x9000     
+    mov bx, 16
+    div bx
+
     mov ss, ax
     mov sp, 0x0000
 
@@ -84,7 +90,7 @@ boot:
 disk_error:
     mov si, loading_error
     call print
-    jum $
+    jmp $
 
 ;------------------------------------------------------------------------------
 ; Include external files: not needed to be included, as they will be resolved by the linker

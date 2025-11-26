@@ -1,10 +1,9 @@
 [BITS 16]
 
 global load_sectors
+extern print                ; found in io.asm
 
-extern print           ; found in io.asm
-
-loading_error db "Disk read error!", 0x0D,0x0A,0
+loading_error db "Disk read error!", 0x0D, 0x0A, 0
 
 ; ------------------------------------------------------------------------------
 ; load_sectors
@@ -18,65 +17,73 @@ loading_error db "Disk read error!", 0x0D,0x0A,0
 ;   SI = pointer to qword containing starting LBA (little endian)
 ;
 ; Returns:
-;   AX = 0   → Failed (disk error)
-;   AX = 1   → Success
+;   AX = 0 → Failed (disk error)
+;   AX = 1 → Success
 ;
 ; Notes:
 ;   - Uses 16-byte Disk Address Packet (DAP)
 ;   - Caller must ensure buffer is large enough
 ; ------------------------------------------------------------------------------
+
 load_sectors:
     pusha
-
+    
     ; -------------------------------------------------------------------------
     ; Build Disk Address Packet (DAP) on stack
     ; -------------------------------------------------------------------------
     ; Layout:
-    ;   Offset 0 : size (1 byte, 0x10)
-    ;   Offset 1 : reserved (1 byte, 0)
-    ;   Offset 2 : word: number of sectors to read
-    ;   Offset 4 : word: buffer offset
-    ;   Offset 6 : word: buffer segment
-    ;   Offset 8 : qword: starting LBA (little endian)
+    ;   Offset 0  : size (1 byte, 0x10)
+    ;   Offset 1  : reserved (1 byte, 0)
+    ;   Offset 2  : word: number of sectors to read
+    ;   Offset 4  : word: buffer offset
+    ;   Offset 6  : word: buffer segment
+    ;   Offset 8  : qword: starting LBA (little endian)
     ; -------------------------------------------------------------------------
-
-    sub sp, 16                ; allocate 16 bytes on stack
-    mov byte [sp], 0x10       ; DAP size
-    mov byte [sp+1], 0        ; reserved
-    mov [sp+2], cx            ; number of sectors
-    mov [sp+4], bx            ; buffer offset
-    mov [sp+6], es            ; buffer segment
-
-    ; LBA 4 byte and our reg are 2 byte so we have to divided and then load
-    mov ax, [si]              ; lower 16 bits of LBA
-    mov [sp+8], ax
-    mov ax, [si+2]            ; next 16 bits of LBA
-    mov [sp+10], ax
-    mov ax, [si+4]            ; next 16 bits of LBA
-    mov [sp+12], ax
-    mov ax, [si+6]            ; upper 16 bits of LBA
-    mov [sp+14], ax
-
+    
+    sub sp, 16              ; Reserve 16 bytes on stack for DAP
+    
+    ; Build DAP in stack memory
+    mov byte [ss:bp-16], 0x10    ; DAP size = 16 bytes
+    mov byte [ss:bp-15], 0       ; Reserved byte, must be 0
+    mov [ss:bp-14], cx           ; Number of sectors to read (word)
+    mov [ss:bp-12], bx           ; Buffer offset (word)
+    mov [ss:bp-10], es           ; Buffer segment (word)
+    
+    ; LBA (starting sector) is 8 bytes (qword), split into 4 words
+    mov ax, [si]                 ; Load lower 16 bits of LBA from [SI]
+    mov [ss:bp-8], ax            ; Store lower 16 bits into DAP
+    mov ax, [si+2]               ; Load next 16 bits of LBA
+    mov [ss:bp-6], ax            ; Store next 16 bits
+    mov ax, [si+4]               ; Load next 16 bits of LBA
+    mov [ss:bp-4], ax            ; Store next 16 bits
+    mov ax, [si+6]               ; Load upper 16 bits of LBA
+    mov [ss:bp-2], ax            ; Store upper 16 bits
+    
     ; -------------------------------------------------------------------------
     ; BIOS call to read sectors
     ; -------------------------------------------------------------------------
-    mov ah, 0x42              ; LBA read
-    mov dl, dx                ; drive number
-    lea si, [sp]              ; DS:SI → DAP (stack)
-    int 0x13
-    jc .disk_error            ; jump if carry, 0x13 set flag register cf to 1 on error
-
-    mov ax, 1                 ; success
-    add sp, 16                ; freeing 16 byte stack which we have reserved.
+    mov ah, 0x42                 ; Extended read function
+    ; DX already contains drive number from caller
+    mov si, sp                   ; SI points to DAP on stack
+    int 0x13                     ; Call BIOS
+    
+    jc .disk_error               ; Jump if carry flag set (error)
+    
+    ; Success path
+    add sp, 16                   ; Clean up stack
     popa
+    mov ax, 1                    ; Return success
     ret
 
 .disk_error:
-    mov ax, 0                 ; failure
-    add sp, 16
-    pusha
+    add sp, 16                   ; Clean up stack
+    popa
+    
+    ; Print error message
+    push si
     mov si, loading_error
     call print
-    popa
-    popa
+    pop si
+    
+    xor ax, ax                   ; Return 0 (failure)
     ret
