@@ -1,5 +1,5 @@
 
-/* As the bootloader.asm file has label start:*/
+/* As the boot.asm file has label start:*/
 ENTRY(start)
 
 SECTIONS {

@@ -13,9 +13,7 @@ bits 16
 ; Handles: regular chars, \r (0x0D), \n (0x0A)
 ;------------------------------------------------------------------------------
 Print:
-    push ax
-    push bx
-    push si
+    pusha
 
     mov bh, 0                          ; Page 0
     mov bl, 0x0F                       ; White color
@@ -30,9 +28,7 @@ Print:
     jmp .loop
 
 .done:
-    pop si
-    pop bx
-    pop ax
+    popa
     ret
 
 

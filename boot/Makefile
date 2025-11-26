@@ -7,8 +7,8 @@ all: $(BOOTLOADER_OBJS)
 
 $(BUILD_DIR)/%.o: %.asm | $(BUILD_DIR)
 	nasm -f elf $< -F dwarf -g -o $@
-	ld -m elf_i386 -T bootloader.lds $@ -o $@.elf
-	objcopy -O binary $(BUILD_DIR)/bootloader.o.elf $@
+	ld -m elf_i386 -T boot.lds $@ -o $@.elf
+	objcopy -O binary $(BUILD_DIR)/boot.o.elf $@
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
