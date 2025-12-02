@@ -1,6 +1,6 @@
 
 /* 2nd stage boot loader */
-ENTRY(start)
+ENTRY(s2_start)
 
 SECTIONS {
     . = 0x7E00;

@@ -1,25 +1,17 @@
 ;==============================================================================
 ; boot.asm - Main bootloader file
 ;==============================================================================
-[bits 16]
+bits 16
 global start
 
-extern print
-extern clear_screen
-
-start:
-    jmp boot
-
-;------------------------------------------------------------------------------
-; Data Section
-;------------------------------------------------------------------------------
 msg             db "Zeen OS", 0x0D, 0x0A, 0
-boot_message    db "Load...", 0x0D, 0x0A, 0
+boot_message    db "Loading...", 0x0D, 0x0A, 0
 loading_success db "OK!", 0x0D, 0x0A, 0
 loading_error db "Disk read error!", 0x0D,0x0A,0
 
-STACK_TOP equ 0x90000                ; Top of stack 0x90000 (576kb)
-STACK_BOTTOM equ 0x80000             ; Bottom of stack 64kb of stack.(not used just for rem)
+
+start:
+    jmp boot
 
 ;------------------------------------------------------------------------------
 ; Boot Initialization
@@ -49,7 +41,7 @@ boot:
     ; SS:SP = 0x9000:0x0000
     ; physical = 0x9000 * 16 + 0x0000 = 0x90000 (576kb)
 
-    mov ax, STACK_TOP     ; 0x90000/16 = 0x9000     
+    mov ax, 0x9000           ; 0x90000/16 = 0x9000     
     mov bx, 16
     div bx
 
@@ -57,12 +49,10 @@ boot:
     mov sp, 0x0000
 
     sti                         ; enable interrupts
-
+    
     call clear_screen
-
     mov si, msg
     call print
-
     mov si, boot_message
     call print
 
@@ -77,25 +67,52 @@ boot:
 
     mov ah, 0x02        ; BIOS: read sectors
     mov al, 0x01        ; number of sectors to read
-    mov ch, 0x00        ; cylinder
+    mov ch, 0x80        ; first hard disk
     mov cl, 0x02        ; sector (second sector)
     mov dh, 0x00        ; head
-    mov dl, 0x80        ; drive number (first hard disk)
+    mov dl, 0x80        ; drive number (first hard disk 0x80)
     int 0x13
-    jc disk_error       ; jump if error
+    ; jc halt             ; jump if error
 
     jmp 0x07E0:0x0000   ; jump to Stage 2 start
 
 
-disk_error:
-    mov si, loading_error
-    call print
+print:
+    pusha
+
+    mov bh, 0                          ; Page 0
+    mov bl, 0x0F                       ; White color
+
+.loop:
+    lodsb
+    test al, al
+    jz .done
+
+    mov ah, 0x0E                       ; BIOS teletype
+    int 0x10
+    jmp .loop
+
+.done:
+    popa
+    ret
+
+
+clear_screen:
+    push ax
+
+    mov ah, 0x00                       ; Set video mode
+    mov al, 0x03                       ; 80x25 text mode
+    int 0x10
+
+    pop ax
+    ret
+
+halt:
     jmp $
 
 ;------------------------------------------------------------------------------
 ; Include external files: not needed to be included, as they will be resolved by the linker
 ;------------------------------------------------------------------------------
-; %include "constants.asm"
 ; %include "io.asm"
 
 ;------------------------------------------------------------------------------

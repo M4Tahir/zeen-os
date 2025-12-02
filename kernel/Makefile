@@ -1,8 +1,8 @@
 BUILD_DIR := ../build/kernel
 
 KERNEL_SRCS := $(wildcard *.c)
-KERNEL_OBJS := $(patsubst %.c, $(BUILD_DIR)/%.o, $(KERNAL_SRCS))
-KERNEL := $(BUILD_DIR)/kernal
+KERNEL_OBJS := $(patsubst %.c, $(BUILD_DIR)/%.o, $(KERNEL_SRCS))
+KERNEL := $(BUILD_DIR)/kernel
 
 CFLAGS := -ffreestanding -nostdlib -gdwarf-4 -m32 -ggdb3
 
@@ -14,7 +14,7 @@ $(BUILD_DIR)/%.o: %.c | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(KERNEL): $(KERNAL_OBJS)
+$(KERNEL): $(KERNEL_OBJS)
 	ld -m elf_i386 -nmagic -T kernel.lds $(KERNEL_OBJS) -o $@
 
 clean:

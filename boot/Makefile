@@ -28,12 +28,13 @@ $(BUILD_DIR)/%.elf: $(BUILD_DIR)/%.o
 # Stage 1 bootloader
 $(S1_BIN): $(OBJS)
 	@echo "Linking stage 1 bootloader..."
-	ld -m elf_i386 -T $(S1_LDSCRIPT) $(OBJS) -o $(S1_ELF)
+	# ld -m elf_i386 -T $(S1_LDSCRIPT) $(OBJS) -o $(S1_ELF) # this cause bug as the linker script will grab all the .text section from all objects
+	ld -m elf_i386 -T $(S1_LDSCRIPT) $(BUILD_DIR)/boot.o -o $(S1_ELF)	
 	objcopy -O binary $(S1_ELF) $@
 	@echo "Bootloader ready: $@"
 
-# Stage 2 bootloader
-$(S2_BIN): $(OBJS)
+# Stage 2 bootloader: Don't include boot.o in the 2nd stage as in lds .text will inlcude text sec from all objs file
+$(S2_BIN): $(filter-out $(BUILD_DIR)/boot.o, $(OBJS))
 	@echo "Linking stage 2 bootloader..."
 	ld -m elf_i386 -T $(S2_LDSCRIPT) $(OBJS) -o $(S2_ELF)
 	objcopy -O binary $(S2_ELF) $@
