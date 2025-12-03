@@ -42,14 +42,9 @@ boot:
     ; physical = 0x9000 * 16 + 0x0000 = 0x90000 (576kb)
 
     mov ax, 0x9000           ; 0x90000/16 = 0x9000     
-    mov bx, 16
-    div bx
-
     mov ss, ax
     mov sp, 0x0000
 
-    sti                         ; enable interrupts
-    
     call clear_screen
     mov si, msg
     call print
@@ -67,15 +62,29 @@ boot:
 
     mov ah, 0x02        ; BIOS: read sectors
     mov al, 0x01        ; number of sectors to read
-    mov ch, 0x80        ; first hard disk
+    mov ch, 0x00        ; first hard disk
     mov cl, 0x02        ; sector (second sector)
     mov dh, 0x00        ; head
     mov dl, 0x80        ; drive number (first hard disk 0x80)
     int 0x13
-    ; jc halt             ; jump if error
+    jc error             ; jump if error
+    jmp success
+
+
+error:
+    mov si, loading_error
+    call print
+    jmp halt
+
+success:
+    mov si, loading_success
+    call print
 
     jmp 0x07E0:0x0000   ; jump to Stage 2 start
 
+halt:
+    hlt
+    jmp halt
 
 print:
     pusha
@@ -106,9 +115,6 @@ clear_screen:
 
     pop ax
     ret
-
-halt:
-    jmp $
 
 ;------------------------------------------------------------------------------
 ; Include external files: not needed to be included, as they will be resolved by the linker
