@@ -61,7 +61,7 @@ boot:
     xor bx, bx          ; BX = 0 → ES:BX = 0x07E0:0x0000 → 0x7E00
 
     mov ah, 0x02        ; BIOS: read sectors
-    mov al, 0x01        ; number of sectors to read
+    mov al, 0x02        ; number of sectors to read
     mov ch, 0x00        ; first hard disk
     mov cl, 0x02        ; sector (second sector)
     mov dh, 0x00        ; head
@@ -80,7 +80,7 @@ success:
     mov si, loading_success
     call print
 
-    jmp 0x07E0:0x0000   ; jump to Stage 2 start
+    jmp 0x07E0:0x00   ; jump to Stage 2 start
 
 halt:
     hlt
