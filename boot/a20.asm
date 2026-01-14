@@ -60,6 +60,7 @@ a20_enable:
 
         in      al, 0x92
         or      al, 00000010b
+        and     al, 11111110b   ; clear bit 0 to prevent reset, incase it was set
         out     0x92, al
 
         popa

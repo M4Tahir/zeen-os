@@ -40,10 +40,14 @@ boot:
     ; Stack top start below the EBDA regsion from 576kb region toward the kernal load address
     ; SS:SP = 0x9000:0x0000
     ; physical = 0x9000 * 16 + 0x0000 = 0x90000 (576kb)
+    ; Sp now points to the top of the ss i.e :
+    ; Physical stack start: SS * 16 = 0x9000 * 16 = 0x90000
+    ; Physical stack end:   0x90000 + 0xFFFF = 0x9FFFF
+    
 
     mov ax, 0x9000           ; 0x90000/16 = 0x9000     
     mov ss, ax
-    mov sp, 0x0000
+    mov sp, 0xFFFE
 
     call clear_screen
     mov si, msg
