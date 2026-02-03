@@ -3,6 +3,9 @@
 ;==============================================================================
 bits 16
 
+global print
+global clear_screen
+
 ;------------------------------------------------------------------------------
 ; Print - Output null-terminated string
 ;------------------------------------------------------------------------------
@@ -12,10 +15,8 @@ bits 16
 ; Uses BIOS INT 10h Teletype function
 ; Handles: regular chars, \r (0x0D), \n (0x0A)
 ;------------------------------------------------------------------------------
-Print:
-    push ax
-    push bx
-    push si
+print:
+    pusha
 
     mov bh, 0                          ; Page 0
     mov bl, 0x0F                       ; White color
@@ -30,9 +31,7 @@ Print:
     jmp .loop
 
 .done:
-    pop si
-    pop bx
-    pop ax
+    popa
     ret
 
 
@@ -42,7 +41,7 @@ Print:
 ; Uses BIOS INT 10h to reset video mode
 ; This clears screen and moves cursor to (0,0)
 ;------------------------------------------------------------------------------
-ClearScreen:
+clear_screen:
     push ax
 
     mov ah, 0x00                       ; Set video mode

@@ -1,0 +1,3 @@
+[asm-lsp]
+dailect = "nasm"
+include_paths = ["./"]

@@ -1,4 +1,4 @@
-ENTRY(main)
+ENTRY(_start)
 
 PHDRS
 {
@@ -9,7 +9,7 @@ PHDRS
 
 SECTIONS
 {
-    . = 0x600;
+    . = 0x10000;
 
     .text : ALIGN(0x100){
         *(.text)
