@@ -144,10 +144,10 @@ extern gdt_ptr_t   gdt_ptr;
  *
  * Sets up the GDT with standard kernel and user mode segments:
  *   - Entry 0: Null descriptor (required by x86 architecture)
- *   - Entry 1: Kernel data segment
- *   - Entry 2: Kernel code segment
- *   - Entry 3: User data segment
- *   - Entry 4: User code segment
+ *   - Entry 1: Kernel CODE segment (selector 0x08)
+ *   - Entry 2: Kernel DATA segment (selector 0x10)
+ *   - Entry 3: User DATA segment (selector 0x18)
+ *   - Entry 4: User CODE segment (selector 0x20)
  */
 void init_gdt(void);
 
